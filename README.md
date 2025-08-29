@@ -120,33 +120,30 @@ Modifica `assistente_ai_optimized.ino`:
 
 ```
 ESP32-AI-Voice-Assistant/
-├── assistente_ai_basic.ino          # Versione base
-├── assistente_ai_optimized/          # Versione ottimizzata
-│   ├── assistente_ai_optimized.ino   # Codice principale
-│   ├── platformio.ini                # Configurazione PlatformIO
-│   ├── test_compilation.bat          # Script test compilazione
-│   └── docs/                         # Documentazione tecnica
-│       ├── OTTIMIZZAZIONI_PARALLELE.md
-│       ├── SUGGERIMENTI_PRESTAZIONI.md
-│       ├── CONFIGURAZIONI_AVANZATE.md
-│       └── CORREZIONI_COMPILAZIONE.md
-├── hardware/                         # Schemi e PCB
-├── examples/                         # Esempi d'uso
-└── README.md                         # Questo file
+├── README.md                         # Documentazione principale
+├── QUICK_START.md                    # Guida rapida setup
+├── LICENSE                           # Licenza MIT
+├── config_template.h                 # Template configurazione
+├── .gitignore                        # File da escludere da Git
+├── assistente_ai_optimized/          # Codice principale
+│   └── assistente_ai_optimized.ino   # Firmware ottimizzato
+└── hardware/                         # Risorse hardware
+    └── hw.png                        # Schema connessioni
 ```
 
 ## 🚀 Quick Start
 
 ### 1. Carica il Firmware
-1. Apri `assistente_ai_optimized/assistente_ai_optimized.ino`
-2. Configura WiFi e API keys
-3. Seleziona board: "ESP32S3 Dev Module"
-4. Configura:
+1. Copia `config_template.h` in `config_private.h`
+2. Configura WiFi e API keys in `config_private.h`
+3. Apri `assistente_ai_optimized/assistente_ai_optimized.ino`
+4. Seleziona board: "ESP32S3 Dev Module"
+5. Configura:
    - CPU Frequency: 240MHz
    - Flash Size: 16MB
    - PSRAM: OPI PSRAM
    - Partition Scheme: 16M Flash (3MB APP/9.9MB FATFS)
-5. Carica il codice
+6. Carica il codice
 
 ### 2. Test Funzionamento
 1. Apri Serial Monitor (115200 baud)
