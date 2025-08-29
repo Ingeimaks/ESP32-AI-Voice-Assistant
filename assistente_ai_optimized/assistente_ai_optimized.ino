@@ -36,8 +36,8 @@
 #endif
 
 // ==== CONFIG WiFi & Google ====
-const char* WIFI_SSID = WIFI_SSID;
-const char* WIFI_PASS = WIFI_PASSWORD;
+const char* wifi_ssid = WIFI_SSID;
+const char* wifi_pass = WIFI_PASSWORD;
 #define LANG_CODE      "it-IT"
 
 const char* STT_HOST  = "speech.googleapis.com";
@@ -357,7 +357,7 @@ void wifiConnect(){
   WiFi.mode(WIFI_STA);
   WiFi.setTxPower(WIFI_POWER_19_5dBm); // Massima potenza
   WiFi.setSleep(false); // Disabilita sleep per prestazioni
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFi.begin(wifi_ssid, wifi_pass);
   
   Serial.print("WiFi");
   uint32_t start = millis();
