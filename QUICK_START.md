@@ -199,10 +199,21 @@ Il sistema mostra metriche in tempo reale:
 
 ---
 
+## 👨‍💻 Autore
+
+**Ingeimaks** - Creatore del progetto
+
+✍️ **Segui il canale Ingeimaks per nuovi progetti ESP32 e altri contenuti di elettronica, Arduino e stampa 3D!**
+
+🎥 **YouTube**: https://www.youtube.com/@Ingeimaks
+
 ## 🆘 Supporto
 
 - 🐛 **Bug**: Apri issue su GitHub
 - 💬 **Domande**: Discussioni GitHub
+- 🎥 **Tutorial**: Canale YouTube Ingeimaks
 - 📖 **Documentazione completa**: `README.md`
 
 **🎉 Buon divertimento con il tuo assistente AI!**
+
+**🎥 Non dimenticare di iscriverti al canale Ingeimaks!**

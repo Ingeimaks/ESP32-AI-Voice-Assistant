@@ -252,14 +252,25 @@ Distribuito sotto licenza MIT. Vedi `LICENSE` per maggiori informazioni.
 - [Arduino](https://www.arduino.cc/) per l'IDE
 - Community ESP32 per supporto e librerie
 
+## 👨‍💻 Autore
+
+**Ingeimaks** - Creatore e sviluppatore principale
+
+✍️ **Segui il canale Ingeimaks per nuovi progetti ESP32 e altri contenuti di elettronica, Arduino e stampa 3D!**
+
+🎥 **YouTube**: https://www.youtube.com/@Ingeimaks
+
 ## 📞 Supporto
 
 - 🐛 **Bug Reports**: Apri un issue su GitHub
 - 💡 **Feature Requests**: Discussioni GitHub
-- 📧 **Contatto**: [Il tuo contatto]
+- 🎥 **Tutorial e Guide**: Canale YouTube Ingeimaks
+- 📧 **Contatto**: Tramite YouTube o GitHub
 
 ---
 
 **⭐ Se questo progetto ti è utile, lascia una stella su GitHub!**
 
 **🔗 Condividi con la community maker italiana!**
+
+**🎥 Iscriviti al canale Ingeimaks per altri progetti fantastici!**
