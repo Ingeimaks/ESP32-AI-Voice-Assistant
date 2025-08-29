@@ -36,6 +36,20 @@
 - **Speaker**: 4-8Ω, 3W
 - **Sensore ToF**: VL53L0X (opzionale)
 
+## 🛒 Materiali e Link Acquisto
+
+### 📦 Componenti Necessari
+- **ESP32-S3**: [Acquista su Amazon](https://amzn.to/4oZGXWk)
+- **INMP441 Microfono**: [Acquista su Amazon](https://amzn.to/3HO15Ko)
+- **MAX98357A Amplificatore**: [Acquista su Amazon](https://amzn.to/3JBlL8U)
+- **Breadboard**: [Acquista su Amazon](https://amzn.to/4fZILKH)
+- **Cassa 3W 4Ω**: [Acquista su Amazon](https://amzn.to/3JwLlfn)
+
+### 📢 Rimani Aggiornato
+**Canale Telegram**: [https://t.me/Ingeimaks](https://t.me/Ingeimaks)
+
+*Unisciti al canale Telegram per ricevere aggiornamenti sui nuovi progetti ESP32, tutorial e guide esclusive!*
+
 ### Schema Connessioni
 
 #### Microfono INMP441 (I2S_NUM_1)
