@@ -1,58 +1,58 @@
 # 🤖 ESP32 AI Voice Assistant
 
-**Un assistente vocale AI completo basato su ESP32-S3 con Google Cloud Services**
+**A complete AI voice assistant based on ESP32-S3 with Google Cloud Services**
 
 [![ESP32](https://img.shields.io/badge/ESP32-S3-red.svg)](https://www.espressif.com/en/products/socs/esp32-s3)
 [![Google Cloud](https://img.shields.io/badge/Google%20Cloud-AI-blue.svg)](https://cloud.google.com/)
 [![Arduino](https://img.shields.io/badge/Arduino-IDE-green.svg)](https://www.arduino.cc/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🎯 Caratteristiche Principali
+## 🎯 Key Features
 
-- **🎙️ Speech-to-Text**: Riconoscimento vocale in tempo reale
-- **🤖 AI Gemini**: Risposte intelligenti e contestuali
-- **🔊 Text-to-Speech**: Sintesi vocale naturale italiana
-- **⚡ Esecuzione Parallela**: Multi-core ottimizzato (63% più veloce)
-- **🌐 Pre-connessioni TLS**: Latenza ridotta
-- **🛡️ Sistema Anti-crash**: Watchdog ottimizzato e retry automatici
-- **📏 Gestione Testi Lunghi**: Divisione intelligente per TTS
-- **🎯 Sensore ToF**: Attivazione automatica per presenza
+- **🎙️ Speech-to-Text**: Real-time voice recognition
+- **🤖 AI Gemini**: Intelligent and contextual responses
+- **🔊 Text-to-Speech**: Natural Italian voice synthesis
+- **⚡ Parallel Execution**: Multi-core optimized (63% faster)
+- **🌐 TLS Pre-connections**: Reduced latency
+- **🛡️ Anti-crash System**: Optimized watchdog and automatic retries
+- **📏 Long Text Management**: Intelligent splitting for TTS
+- **🎯 ToF Sensor**: Automatic activation for presence detection
 
-## 🚀 Prestazioni
+## 🚀 Performance
 
-| Componente | Tempo Originale | Tempo Ottimizzato | Miglioramento |
-|------------|----------------|-------------------|---------------|
-| **STT** | ~26s | ~15s | **42% più veloce** |
-| **Gemini** | ~20s | ~12s | **40% più veloce** |
-| **TTS** | ~8s | ~4s | **50% più veloce** |
-| **Totale** | ~54s | **~20s** | **🚀 63% più veloce** |
+| Component | Original Time | Optimized Time | Improvement |
+|-----------|---------------|----------------|-------------|
+| **STT** | ~26s | ~15s | **42% faster** |
+| **Gemini** | ~20s | ~12s | **40% faster** |
+| **TTS** | ~8s | ~4s | **50% faster** |
+| **Total** | ~54s | **~20s** | **🚀 63% faster** |
 
-## 🛠️ Hardware Richiesto
+## 🛠️ Required Hardware
 
-### Componenti Principali
-- **ESP32-S3** (con PSRAM)
-- **Microfono I2S**: INMP441
-- **Amplificatore I2S**: MAX98357A
+### Main Components
+- **ESP32-S3** (with PSRAM)
+- **I2S Microphone**: INMP441
+- **I2S Amplifier**: MAX98357A
 - **Speaker**: 4-8Ω, 3W
-- **Sensore ToF**: VL53L0X (opzionale)
+- **ToF Sensor**: VL53L0X (optional)
 
-## 🛒 Materiali e Link Acquisto
+## 🛒 Materials and Purchase Links
 
-### 📦 Componenti Necessari
-- **ESP32-S3**: [Acquista su Amazon](https://amzn.to/4oZGXWk)
-- **INMP441 Microfono**: [Acquista su Amazon](https://amzn.to/3HO15Ko)
-- **MAX98357A Amplificatore**: [Acquista su Amazon](https://amzn.to/3JBlL8U)
-- **Breadboard**: [Acquista su Amazon](https://amzn.to/4fZILKH)
-- **Cassa 3W 4Ω**: [Acquista su Amazon](https://amzn.to/3JwLlfn)
+### 📦 Required Components
+- **ESP32-S3**: [Buy on Amazon](https://amzn.to/4oZGXWk)
+- **INMP441 Microphone**: [Buy on Amazon](https://amzn.to/3HO15Ko)
+- **MAX98357A Amplifier**: [Buy on Amazon](https://amzn.to/3JBlL8U)
+- **Breadboard**: [Buy on Amazon](https://amzn.to/4fZILKH)
+- **3W 4Ω Speaker**: [Buy on Amazon](https://amzn.to/3JwLlfn)
 
-### 📢 Rimani Aggiornato
-**Canale Telegram**: [https://t.me/Ingeimaks](https://t.me/Ingeimaks)
+### 📢 Stay Updated
+**Telegram Channel**: [https://t.me/Ingeimaks](https://t.me/Ingeimaks)
 
-*Unisciti al canale Telegram per ricevere aggiornamenti sui nuovi progetti ESP32, tutorial e guide esclusive!*
+*Join the Telegram channel to receive updates on new ESP32 projects, tutorials and exclusive guides!*
 
-### Schema Connessioni
+### Wiring Diagram
 
-#### Microfono INMP441 (I2S_NUM_1)
+#### INMP441 Microphone (I2S_NUM_1)
 ```
 ESP32-S3    INMP441
 --------    -------
@@ -63,7 +63,7 @@ GPIO 41  -> SD (Serial Data)
 GND      -> GND
 ```
 
-#### Amplificatore MAX98357A (I2S_NUM_0)
+#### MAX98357A Amplifier (I2S_NUM_0)
 ```
 ESP32-S3    MAX98357A
 --------    ---------
@@ -74,7 +74,7 @@ GPIO 14  -> DIN (Data Input)
 GND      -> GND
 ```
 
-#### Sensore VL53L0X (I2C)
+#### VL53L0X ToF Sensor (I2C)
 ```
 ESP32-S3    VL53L0X
 --------    -------
@@ -84,204 +84,195 @@ GPIO 22  -> SCL
 GND      -> GND
 ```
 
-## ⚙️ Configurazione Software
+![Wiring Diagram](hardware/hw.png)
 
-### 1. Installazione Arduino IDE
-1. Scarica [Arduino IDE](https://www.arduino.cc/en/software)
-2. Aggiungi ESP32 board manager:
-   - File → Preferences
-   - Additional Board Manager URLs: `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json`
-3. Tools → Board → Boards Manager → Cerca "ESP32" → Installa
-
-### 2. Librerie Richieste
-Installa tramite Library Manager:
-```
-- ArduinoJson (>= 6.21.0)
-- WiFiClientSecure
-- VL53L0X (Pololu)
-```
-
-### 3. Configurazione Google Cloud
-
-#### Crea Progetto Google Cloud
-1. Vai su [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea nuovo progetto
-3. Abilita le API:
-   - Speech-to-Text API
-   - Text-to-Speech API
-   - Gemini API (Vertex AI)
-
-#### Genera API Key
-1. APIs & Services → Credentials
-2. Create Credentials → API Key
-3. Copia la chiave generata
-
-### 4. Configurazione Codice
-
-Modifica `assistente_ai_optimized.ino`:
-
-```cpp
-// === CONFIGURAZIONE WIFI ===
-#define WIFI_SSID     "TUO_WIFI_SSID"
-#define WIFI_PASSWORD "TUA_WIFI_PASSWORD"
-
-// === CONFIGURAZIONE GOOGLE CLOUD ===
-#define GCP_API_KEY   "TUA_API_KEY_GOOGLE_CLOUD"
-#define GEMINI_MODEL  "gemini-1.5-flash-latest"
-```
-
-## 📁 Struttura Progetto
+## 📁 Project Structure
 
 ```
 ESP32-AI-Voice-Assistant/
-├── README.md                         # Documentazione principale
-├── QUICK_START.md                    # Guida rapida setup
-├── LICENSE                           # Licenza MIT
-├── config_template.h                 # Template configurazione
-├── .gitignore                        # File da escludere da Git
-├── assistente_ai_optimized/          # Codice principale
-│   └── assistente_ai_optimized.ino   # Firmware ottimizzato
-└── hardware/                         # Risorse hardware
-    └── hw.png                        # Schema connessioni
+├── README.md                    # This file
+├── QUICK_START.md              # Quick setup guide
+├── LICENSE                     # MIT License
+├── config_template.h           # Configuration template
+├── .gitignore                  # Git ignore file
+├── assistente_ai_optimized/    # Main project folder
+│   └── assistente_ai_optimized.ino  # Arduino sketch
+└── hardware/
+    └── hw.png                  # Wiring diagram
 ```
 
-## 🚀 Quick Start
+## ⚡ Quick Start
 
-### 1. Carica il Firmware
-1. Copia `config_template.h` in `config_private.h`
-2. Configura WiFi e API keys in `config_private.h`
-3. Apri `assistente_ai_optimized/assistente_ai_optimized.ino`
-4. Seleziona board: "ESP32S3 Dev Module"
-5. Configura:
-   - CPU Frequency: 240MHz
-   - Flash Size: 16MB
-   - PSRAM: OPI PSRAM
-   - Partition Scheme: 16M Flash (3MB APP/9.9MB FATFS)
-6. Carica il codice
+### 1. Prerequisites
+- Arduino IDE with ESP32 support
+- Google Cloud account with enabled APIs
+- Required libraries (see Installation)
 
-### 2. Test Funzionamento
-1. Apri Serial Monitor (115200 baud)
-2. Attendi connessione WiFi
-3. Avvicina la mano al sensore ToF (< 10cm) o premi INVIO
-4. Parla per 5 secondi quando vedi "🎙️ Registrazione..."
-5. Attendi la risposta vocale
+### 2. Installation
+Install these libraries via Arduino Library Manager:
+```
+- WiFiClientSecure
+- ArduinoJson (v6+)
+- VL53L0X (Pololu)
+```
 
-## 🎛️ Modalità d'Uso
+### 3. Google Cloud Setup
+1. Create a project on [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable these APIs:
+   - **Cloud Speech-to-Text API**
+   - **Generative Language API** (Gemini)
+   - **Cloud Text-to-Speech API**
+3. Create an API key with access to all three services
 
-### Trigger Automatico
-- **Sensore ToF**: Avvicina la mano a < 10cm
-- **Cooldown**: 2 secondi tra conversazioni
-
-### Trigger Manuale
-- **Serial Monitor**: Premi INVIO
-- **Comando test**: Digita "test" + INVIO
-
-### Comandi Vocali Esempio
-- "Ciao, come stai?"
-- "Che tempo fa oggi?"
-- "Raccontami una barzelletta"
-- "Spiegami la fisica quantistica"
-
-## 🔧 Personalizzazione
-
-### Cambia Voce TTS
+### 4. Configuration
+1. Copy `config_template.h` to `config_private.h`
+2. Edit `config_private.h` with your credentials:
 ```cpp
-d["voice"]["name"] = "it-IT-Neural2-A";  // Voce femminile
-d["voice"]["name"] = "it-IT-Neural2-C";  // Voce maschile (default)
+#define WIFI_SSID     "YourWiFi"           // WiFi name
+#define WIFI_PASSWORD "YourPassword"       // WiFi password
+#define GCP_API_KEY   "your-api-key-here"  // Google Cloud API key
+#define GEMINI_MODEL  "gemini-1.5-flash"   // Gemini model
 ```
 
-### Regola Velocità Parlato
+### 5. Upload
+1. Open `assistente_ai_optimized/assistente_ai_optimized.ino`
+2. Select board: **ESP32S3 Dev Module**
+3. Configure:
+   - **PSRAM**: Enabled
+   - **Flash Size**: 16MB
+   - **Partition**: Default 4MB with spiffs
+4. Upload the code
+
+### 6. Usage
+- **Power on** the ESP32
+- **Wait** for WiFi connection (blue LED)
+- **Speak** when you hear the beep
+- **Listen** to the AI response
+
+## 🔧 Configuration Options
+
+### Audio Settings
 ```cpp
-d["audioConfig"]["speakingRate"] = 1.3;  // Più veloce
-d["audioConfig"]["speakingRate"] = 0.8;  // Più lento
+#define SAMPLE_RATE    16000    // Audio sample rate
+#define RECORD_TIME    5        // Recording duration (seconds)
+#define I2S_PORT       I2S_NUM_1 // I2S port for microphone
 ```
 
-### Modifica Sensibilità ToF
+### Performance Tuning
 ```cpp
-const int TRIGGER_DISTANCE = 15;  // Distanza in cm
+#define ENABLE_TOF_SENSOR true  // Enable ToF sensor
+#define TTS_CHUNK_SIZE    800   // TTS text chunk size
+#define MAX_RETRIES       2     // API retry attempts
 ```
 
-## 📊 Monitoraggio
+## 🎛️ Advanced Features
 
-Il sistema fornisce metriche dettagliate:
+### Multi-core Optimization
+The system uses both ESP32-S3 cores:
+- **Core 0**: Audio processing and I2S management
+- **Core 1**: Network communications and AI processing
 
+### Intelligent Text Splitting
+Long responses are automatically split for optimal TTS processing:
+- Respects sentence boundaries
+- Maintains natural pauses
+- Prevents audio buffer overflow
+
+### Automatic Error Recovery
+- **Connection retry**: Automatic WiFi reconnection
+- **API retry**: Failed requests are retried up to 2 times
+- **Memory management**: Automatic cleanup and watchdog reset
+- **TLS optimization**: Persistent connections reduce latency
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Compilation Error**
 ```
-📊 Tempi: STT=15234ms, Gemini=12456ms, TTS=4123ms
-⚡ Round parallelo completato: 20567ms
-💾 Heap libero: 183524 bytes
-💾 PSRAM libero: 8322780 bytes
-🌐 WiFi: -45dBm
+Error: config_private.h not found
 ```
+**Solution**: Copy `config_template.h` to `config_private.h` and configure it
 
-## 🛠️ Troubleshooting
+**WiFi Connection Failed**
+```
+WiFi connection timeout
+```
+**Solution**: Check SSID/password in `config_private.h`
 
-### Problemi Comuni
+**API Error 403**
+```
+Google API authentication failed
+```
+**Solution**: Verify API key and enabled services
 
-#### "❌ HTTPS connect failed"
-- Verifica connessione WiFi
-- Controlla API key Google Cloud
-- Verifica che le API siano abilitate
+**Audio Issues**
+```
+No audio input/output
+```
+**Solution**: Check I2S wiring and component connections
 
-#### "❌ STT fallita"
-- Controlla connessioni microfono
-- Verifica che il microfono funzioni
-- Parla più chiaramente e vicino al microfono
-
-#### "❌ TTS fallita"
-- Controlla connessioni speaker
-- Verifica alimentazione (potrebbe servire alimentatore esterno)
-- Controlla volume sistema
-
-#### Riavvii Continui
-- Usa alimentatore esterno 5V 2A
-- Verifica connessioni I2S
-- Controlla memoria PSRAM
-
-### Debug Avanzato
-
-Abilita debug dettagliato:
+### Debug Mode
+Enable detailed logging by uncommenting:
 ```cpp
-#define DEBUG_LEVEL 3  // 0=None, 1=Error, 2=Warn, 3=Info, 4=Debug
+#define DEBUG_MODE 1
 ```
 
-## 🤝 Contribuire
+## 📊 Performance Monitoring
 
-1. Fork del progetto
-2. Crea feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit delle modifiche (`git commit -m 'Add AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri Pull Request
+The system provides real-time performance metrics:
+- **Response times** for each API call
+- **Memory usage** monitoring
+- **Network latency** measurements
+- **Audio quality** indicators
 
-## 📄 Licenza
+## 🔒 Security
 
-Distribuito sotto licenza MIT. Vedi `LICENSE` per maggiori informazioni.
+- **Secure connections**: All API calls use TLS 1.2+
+- **Credential protection**: Private config file excluded from Git
+- **Memory safety**: Automatic buffer management
+- **Input validation**: Sanitized API responses
 
-## 🙏 Ringraziamenti
+## 🤝 Contributing
 
-- [Espressif](https://www.espressif.com/) per ESP32-S3
-- [Google Cloud](https://cloud.google.com/) per i servizi AI
-- [Arduino](https://www.arduino.cc/) per l'IDE
-- Community ESP32 per supporto e librerie
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 👨‍💻 Autore
+## 📄 License
 
-**Ingeimaks** - Creatore e sviluppatore principale
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-✍️ **Segui il canale Ingeimaks per nuovi progetti ESP32 e altri contenuti di elettronica, Arduino e stampa 3D!**
+## 👨‍💻 Author
 
-🎥 **YouTube**: https://www.youtube.com/@Ingeimaks
+**Ingeimaks** - *ESP32 & IoT Developer*
+- YouTube: [Ingeimaks Channel](https://www.youtube.com/@Ingeimaks)
+- Telegram: [https://t.me/Ingeimaks](https://t.me/Ingeimaks)
 
-## 📞 Supporto
+## 🙏 Acknowledgments
 
-- 🐛 **Bug Reports**: Apri un issue su GitHub
-- 💡 **Feature Requests**: Discussioni GitHub
-- 🎥 **Tutorial e Guide**: Canale YouTube Ingeimaks
-- 📧 **Contatto**: Tramite YouTube o GitHub
+- Google Cloud Platform for AI services
+- Espressif for the amazing ESP32-S3
+- Arduino community for libraries and support
+- All contributors and testers
+
+## 📈 Changelog
+
+### v2.0 - Optimized Release
+- 63% performance improvement
+- Multi-core parallel execution
+- Intelligent text splitting
+- Enhanced error handling
+- TLS connection optimization
+- Anti-repetition system
+
+### v1.0 - Initial Release
+- Basic voice assistant functionality
+- Google Cloud integration
+- I2S audio support
 
 ---
 
-**⭐ Se questo progetto ti è utile, lascia una stella su GitHub!**
-
-**🔗 Condividi con la community maker italiana!**
-
-**🎥 Iscriviti al canale Ingeimaks per altri progetti fantastici!**
+**⭐ If this project helped you, please give it a star on GitHub!**

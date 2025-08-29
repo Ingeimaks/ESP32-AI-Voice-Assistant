@@ -1,12 +1,12 @@
 /*
- * ESP32 AI Voice Assistant - Versione Ottimizzata
+ * ESP32 AI Voice Assistant - Optimized Version
  * 
- * ISTRUZIONI CONFIGURAZIONE:
- * 1. Copia il file "config_template.h" come "config_private.h"
- * 2. Modifica "config_private.h" con le tue credenziali WiFi e Google Cloud
- * 3. Compila e carica il firmware
+ * CONFIGURATION INSTRUCTIONS:
+ * 1. Copy the file "config_template.h" as "config_private.h"
+ * 2. Modify "config_private.h" with your WiFi and Google Cloud credentials
+ * 3. Compile and upload the firmware
  * 
- * NOTA: Il file config_private.h è escluso da Git per sicurezza
+ * NOTE: The config_private.h file is excluded from Git for security
  */
 
 #include <Arduino.h>
@@ -23,7 +23,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
-// Includi configurazione privata (crea questo file da config_template.h)
+// Include private configuration (create this file from config_template.h)
 #ifdef __has_include
   #if __has_include("../config_private.h")
     #include "../config_private.h"
@@ -32,7 +32,7 @@
 #endif
 
 #ifndef CONFIG_LOADED
-  #error "ERRORE: File config_private.h non trovato! Copia config_template.h come config_private.h e inserisci le tue credenziali."
+  #error "ERROR: config_private.h file not found! Copy config_template.h as config_private.h and insert your credentials."
 #endif
 
 // ==== CONFIG WiFi & Google ====
@@ -46,9 +46,9 @@ const char* TTS_HOST  = "texttospeech.googleapis.com";
 bool TOF_OK = false;
 
 // ==== AUDIO OTTIMIZZATO ====
-#define SR             16000    // 16 kHz per migliore qualità
+#define SR             16000    // 16 kHz for better quality
 #define RECORD_SEC     5        // 5 secondi
-#define AUDIO_BUFFER_SIZE 4096  // Buffer più grande per PSRAM
+#define AUDIO_BUFFER_SIZE 4096  // Larger buffer for PSRAM
 
 // ==== I2S RX (INMP441) — ESP32-S3 OTTIMIZZATO ====
 #define I2S_RX_PORT    I2S_NUM_0
@@ -74,13 +74,13 @@ int SHIFT_BITS = 10; // Ottimizzato per 16kHz
 inline int16_t i2s32to16(int32_t s32){ return (int16_t)(s32 >> SHIFT_BITS); }
 
 // ==== BUFFER GLOBALI IN PSRAM ====
-#define I2S_READ_LARGE      4096  // Buffer più grande
+#define I2S_READ_LARGE      4096  // Larger buffer
 static int32_t* g_i2sBuf = nullptr;
 static uint8_t* g_ulawBuf = nullptr;
 static int16_t* g_pcmBuf = nullptr;
 
 // Buffer Base64 ottimizzati
-#define ENC_CHUNK_BYTES     8192  // Chunk più grandi
+#define ENC_CHUNK_BYTES     8192  // Larger chunks
 static unsigned char* g_b64Out = nullptr;
 static uint8_t* g_encIn = nullptr;
 static inline size_t b64_len(size_t raw){ return ((raw + 2) / 3) * 4; }
@@ -100,12 +100,12 @@ WiFiClientSecure* geminiClient = nullptr;
 WiFiClientSecure* ttsClient = nullptr;
 bool preconnectionsReady = false;
 
-// Task handles per esecuzione parallela
+// Task handles for parallel execution
 TaskHandle_t sttTaskHandle = nullptr;
 TaskHandle_t geminiTaskHandle = nullptr;
 TaskHandle_t ttsTaskHandle = nullptr;
 
-// Strutture per comunicazione tra task
+// Structures for inter-task communication
 struct STTResult {
   String transcript;
   bool success;
@@ -130,7 +130,7 @@ SemaphoreHandle_t sttSemaphore;
 SemaphoreHandle_t geminiSemaphore;
 SemaphoreHandle_t ttsSemaphore;
 
-// Sistema anti-ripetizione
+// Anti-repetition system
 String lastUserInput = "";
 String lastGeminiReply = "";
 uint32_t lastConversationTime = 0;
@@ -147,7 +147,7 @@ void* psram_malloc(size_t size) {
 
 // ==== PRE-CONNESSIONI TLS ====
 void initPreconnections() {
-  Serial.println("🔗 Inizializzazione pre-connessioni TLS...");
+  Serial.println("🔗 Initializing TLS pre-connections...");
   
   sttClient = new WiFiClientSecure();
   geminiClient = new WiFiClientSecure();
@@ -172,9 +172,9 @@ void initPreconnections() {
   
   if (sttOk && geminiOk && ttsOk) {
     preconnectionsReady = true;
-    Serial.printf("✅ Pre-connessioni TLS pronte in %ums\n", connectTime);
+    Serial.printf("✅ TLS pre-connections ready in %ums\n", connectTime);
   } else {
-    Serial.printf("⚠️ Pre-connessioni parziali: STT=%s Gemini=%s TTS=%s\n", 
+    Serial.printf("⚠️ Partial pre-connections: STT=%s Gemini=%s TTS=%s\n", 
                   sttOk ? "OK" : "FAIL", geminiOk ? "OK" : "FAIL", ttsOk ? "OK" : "FAIL");
   }
 }
@@ -186,26 +186,26 @@ void cleanupPreconnections() {
   preconnectionsReady = false;
 }
 
-// Verifica e ripristina pre-connessioni se necessario
+// Check and restore pre-connections if necessary
 void checkAndRestorePreconnections() {
   bool needRestore = false;
   
   if (!sttClient || !sttClient->connected()) {
-    Serial.println("⚠️ Pre-connessione STT persa, ripristino...");
+    Serial.println("⚠️ STT pre-connection lost, restoring...");
     needRestore = true;
   }
   if (!geminiClient || !geminiClient->connected()) {
-    Serial.println("⚠️ Pre-connessione Gemini persa, ripristino...");
+    Serial.println("⚠️ Gemini pre-connection lost, restoring...");
     needRestore = true;
   }
   if (!ttsClient || !ttsClient->connected()) {
-    Serial.println("⚠️ Pre-connessione TTS persa, ripristino...");
+    Serial.println("⚠️ TTS pre-connection lost, restoring...");
     needRestore = true;
   }
   
   if (needRestore) {
     cleanupPreconnections();
-    delay(1000); // Pausa prima di riconnettersi
+    delay(1000); // Pause before reconnecting
     initPreconnections();
   }
 }
@@ -215,14 +215,14 @@ void sttTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  // Retry automatico per STT
+  // Automatic retry for STT
   int retryCount = 0;
   const int maxRetries = 2;
   
   do {
     if (retryCount > 0) {
       Serial.printf("🔄 STT retry %d/%d\n", retryCount, maxRetries);
-      delay(1000); // Pausa tra retry
+      delay(1000); // Pause between retries
     }
     
     sttResult.success = stt_stream_optimized(sttResult.transcript);
@@ -233,7 +233,7 @@ void sttTask(void* parameter) {
   sttResult.processingTime = millis() - startTime;
   
   if (!sttResult.success) {
-    Serial.printf("❌ STT fallita dopo %d tentativi\n", maxRetries);
+    Serial.printf("❌ STT failed after %d attempts\n", maxRetries);
   }
   
   xSemaphoreGive(sttSemaphore);
@@ -244,17 +244,17 @@ void geminiTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  // Aspetta che STT sia completato con timeout più lungo
+  // Wait for STT completion with longer timeout
   if (xSemaphoreTake(sttSemaphore, pdMS_TO_TICKS(45000)) == pdTRUE) {
     if (sttResult.success) {
-      // Retry automatico per Gemini
+      // Automatic retry for Gemini
       int retryCount = 0;
       const int maxRetries = 2;
       
       do {
         if (retryCount > 0) {
           Serial.printf("🔄 Gemini retry %d/%d\n", retryCount, maxRetries);
-          delay(2000); // Pausa più lunga per Gemini
+          delay(2000); // Longer pause for Gemini
         }
         
         geminiResult.success = gemini_generate_reply_optimized(sttResult.transcript, geminiResult.reply);
@@ -263,14 +263,14 @@ void geminiTask(void* parameter) {
       } while (!geminiResult.success && retryCount <= maxRetries);
       
       if (!geminiResult.success) {
-        Serial.printf("❌ Gemini fallita dopo %d tentativi\n", maxRetries);
+        Serial.printf("❌ Gemini failed after %d attempts\n", maxRetries);
       }
     } else {
-      Serial.println("⚠️ STT fallita, Gemini non eseguito");
+      Serial.println("⚠️ STT failed, Gemini not executed");
       geminiResult.success = false;
     }
   } else {
-    Serial.println("❌ Timeout STT (45s), Gemini non eseguito");
+    Serial.println("❌ STT timeout (45s), Gemini not executed");
     geminiResult.success = false;
   }
   
@@ -283,17 +283,17 @@ void ttsTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  // Aspetta che Gemini sia completato con timeout più lungo
+  // Wait for Gemini completion with longer timeout
   if (xSemaphoreTake(geminiSemaphore, pdMS_TO_TICKS(50000)) == pdTRUE) {
     if (geminiResult.success) {
-      // Retry automatico per TTS
+      // Automatic retry for TTS
       int retryCount = 0;
       const int maxRetries = 2;
       
       do {
         if (retryCount > 0) {
           Serial.printf("🔄 TTS retry %d/%d\n", retryCount, maxRetries);
-          delay(1500); // Pausa media per TTS
+          delay(1500); // Medium pause for TTS
         }
         
         ttsResult.success = googleTTS_say_mulaw_optimized(geminiResult.reply);
@@ -302,14 +302,14 @@ void ttsTask(void* parameter) {
       } while (!ttsResult.success && retryCount <= maxRetries);
       
       if (!ttsResult.success) {
-        Serial.printf("❌ TTS fallita dopo %d tentativi\n", maxRetries);
+        Serial.printf("❌ TTS failed after %d attempts\n", maxRetries);
       }
     } else {
-      Serial.println("⚠️ Gemini fallita, TTS non eseguito");
+      Serial.println("⚠️ Gemini failed, TTS not executed");
       ttsResult.success = false;
     }
   } else {
-    Serial.println("❌ Timeout Gemini (50s), TTS non eseguito");
+    Serial.println("❌ Gemini timeout (50s), TTS not executed");
     ttsResult.success = false;
   }
   
@@ -319,28 +319,28 @@ void ttsTask(void* parameter) {
 }
 
 void initParallelTasks() {
-  // Crea semafori
+  // Create semaphores
   sttSemaphore = xSemaphoreCreateBinary();
   geminiSemaphore = xSemaphoreCreateBinary();
   ttsSemaphore = xSemaphoreCreateBinary();
   
   if (!sttSemaphore || !geminiSemaphore || !ttsSemaphore) {
-    Serial.println("❌ Errore creazione semafori");
+    Serial.println("❌ Error creating semaphores");
     return;
   }
   
-  Serial.println("✅ Task paralleli inizializzati");
+  Serial.println("✅ Parallel tasks initialized");
 }
 
 void initBuffers() {
-  // Alloca buffer in PSRAM per prestazioni migliori
+  // Allocate buffers in PSRAM for better performance
   g_i2sBuf = (int32_t*)psram_malloc(I2S_READ_LARGE * sizeof(int32_t));
   g_ulawBuf = (uint8_t*)psram_malloc(I2S_READ_LARGE);
   g_pcmBuf = (int16_t*)psram_malloc(I2S_READ_LARGE * sizeof(int16_t));
   g_b64Out = (unsigned char*)psram_malloc(((ENC_CHUNK_BYTES+2)/3)*4 + 64);
   g_encIn = (uint8_t*)psram_malloc(ENC_CHUNK_BYTES + 8);
   
-  // Crea queue per audio processing
+  // Create queue for audio processing
   audioQueue = xQueueCreate(10, sizeof(AudioChunk));
   
   if (!g_i2sBuf || !g_ulawBuf || !g_pcmBuf || !g_b64Out || !g_encIn || !audioQueue) {
@@ -348,15 +348,15 @@ void initBuffers() {
     ESP.restart();
   }
   
-  Serial.printf("✅ Buffers allocati in PSRAM: %u KB\n", 
+  Serial.printf("✅ Buffers allocated in PSRAM: %u KB\n", 
     (I2S_READ_LARGE*7 + ENC_CHUNK_BYTES*2 + 128) / 1024);
 }
 
 // ==== UTILS OTTIMIZZATI ====
 void wifiConnect(){
   WiFi.mode(WIFI_STA);
-  WiFi.setTxPower(WIFI_POWER_19_5dBm); // Massima potenza
-  WiFi.setSleep(false); // Disabilita sleep per prestazioni
+  WiFi.setTxPower(WIFI_POWER_19_5dBm); // Maximum power
+  WiFi.setSleep(false); // Disable sleep for performance
   WiFi.begin(wifi_ssid, wifi_pass);
   
   Serial.print("WiFi");
@@ -371,7 +371,7 @@ void wifiConnect(){
     ESP.restart();
   }
   
-  Serial.printf("\n✅ WiFi connesso - IP: %s\n", WiFi.localIP().toString().c_str());
+  Serial.printf("\n✅ WiFi connected - IP: %s\n", WiFi.localIP().toString().c_str());
   Serial.printf("📶 RSSI: %d dBm\n", WiFi.RSSI());
 }
 
@@ -383,9 +383,9 @@ void i2sInitRX(){
     .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
     .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-    .dma_buf_count = 16,    // Più buffer DMA
-    .dma_buf_len = 1024,    // Buffer DMA più grandi
-    .use_apll = true,       // Usa APLL per clock più preciso
+    .dma_buf_count = 16,    // More DMA buffers
+    .dma_buf_len = 1024,    // Larger DMA buffers
+    .use_apll = true,       // Use APLL for more precise clock
     .tx_desc_auto_clear = false,
     .fixed_mclk = 0,
     .mclk_multiple = I2S_MCLK_MULTIPLE_256,
@@ -403,7 +403,7 @@ void i2sInitRX(){
   ESP_ERROR_CHECK(i2s_set_pin(I2S_RX_PORT, &pins));
   ESP_ERROR_CHECK(i2s_zero_dma_buffer(I2S_RX_PORT));
   
-  Serial.println("✅ I2S RX inizializzato (16kHz, APLL)");
+  Serial.println("✅ I2S RX initialized (16kHz, APLL)");
 }
 
 void i2sInitTX(){
@@ -414,9 +414,9 @@ void i2sInitTX(){
     .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
     .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-    .dma_buf_count = 16,    // Più buffer DMA
-    .dma_buf_len = 512,     // Buffer DMA ottimizzati
-    .use_apll = true,       // Usa APLL
+    .dma_buf_count = 16,    // More DMA buffers
+    .dma_buf_len = 512,     // Optimized DMA buffers
+    .use_apll = true,       // Use APLL
     .tx_desc_auto_clear = true,
     .fixed_mclk = 0,
     .mclk_multiple = I2S_MCLK_MULTIPLE_256,
@@ -434,13 +434,13 @@ void i2sInitTX(){
   ESP_ERROR_CHECK(i2s_set_pin(I2S_TX_PORT, &pins));
   ESP_ERROR_CHECK(i2s_zero_dma_buffer(I2S_TX_PORT));
   
-  Serial.println("✅ I2S TX inizializzato (16kHz, APLL)");
+  Serial.println("✅ I2S TX initialized (16kHz, APLL)");
 }
 
-// Dechunk ottimizzato con pre-allocazione
+// Optimized dechunk with pre-allocation
 String dechunk(const String& in){
   String out;
-  out.reserve(in.length()); // Pre-alloca memoria
+  out.reserve(in.length()); // Pre-allocate memory
   int idx = 0;
   
   while(true){
@@ -460,7 +460,7 @@ String dechunk(const String& in){
   return out.length() ? out : in;
 }
 
-// μ-law helpers ottimizzati
+// Optimized μ-law helpers
 inline uint8_t pcm16_to_mulaw(int16_t s){
   const uint16_t BIAS = 132;
   uint16_t mag = (s < 0) ? (uint16_t)(-s) : (uint16_t)s;
@@ -485,7 +485,7 @@ static inline int16_t mulaw_to_pcm16(uint8_t u){
   return (u & 0x80) ? (0x84 - t) : (t - 0x84);
 }
 
-// Base64 streaming encoder ottimizzato
+// Optimized Base64 streaming encoder
 bool b64_stream_write(WiFiClientSecure& cli, const uint8_t* data, size_t rawBytes){
   size_t total = g_b64_tailLen + rawBytes;
   size_t encLen = (total / 3) * 3;
@@ -561,7 +561,7 @@ bool stt_stream_optimized(String& outText){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(35000); // Timeout più lungo per STT
+    cli->setTimeout(35000); // Longer timeout for STT
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -586,7 +586,7 @@ bool stt_stream_optimized(String& outText){
   g_b64_tailLen = 0;
   g_b64_sent = 0;
 
-  // Acquisizione ottimizzata con buffer più grandi
+  // Optimized acquisition with larger buffers
   uint64_t sumSq = 0;
   int16_t peak = 0;
   size_t samplesSent = 0;
@@ -625,7 +625,7 @@ bool stt_stream_optimized(String& outText){
       }
       samplesSent += n;
       
-      // Yield e watchdog reset più frequenti per evitare timeout
+      // More frequent yield and watchdog reset to avoid timeout
       if (samplesSent % 4000 == 0) {
         taskYIELD();
         esp_task_wdt_reset();
@@ -670,7 +670,7 @@ bool stt_stream_optimized(String& outText){
   body = dechunk(body);
 
   // JSON parsing ottimizzato
-  DynamicJsonDocument doc(16384); // Buffer più grande
+  DynamicJsonDocument doc(16384); // Larger buffer
   DeserializationError err = deserializeJson(doc, body);
   if (err) {
     Serial.print("JSON parse err: ");
@@ -683,7 +683,7 @@ bool stt_stream_optimized(String& outText){
   outText = doc["results"][0]["alternatives"][0]["transcript"] | "";
   bool success = outText.length() > 0;
   
-  // Pulizia memoria se non è pre-connessione
+  // Memory cleanup if not pre-connection
   if (!usePreconnection) {
     delete cli;
   }
@@ -712,7 +712,7 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(30000); // Timeout più lungo per Gemini
+    cli->setTimeout(30000); // Longer timeout for Gemini
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -730,7 +730,7 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
   uint32_t currentTime = millis();
   bool isRepetitive = false;
   
-  // Controlla se è una domanda ripetitiva
+  // Check if it's a repetitive question
   if (userText == lastUserInput && (currentTime - lastConversationTime) < 300000) { // 5 minuti
     Serial.println("⚠️ Domanda ripetitiva rilevata, aggiungo contesto");
     isRepetitive = true;
@@ -754,13 +754,13 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
   
   String enhancedText = userText;
   if (isRepetitive) {
-    enhancedText = "Hai già risposto a questa domanda. Puoi fornire una risposta diversa o più dettagliata? " + userText;
+    enhancedText = "You already answered this question. Can you provide a different or more detailed response? " + userText;
   }
   
   parts.createNestedObject()["text"] = enhancedText;
   
   JsonObject gen = d.createNestedObject("generationConfig");
-  gen["maxOutputTokens"] = 128; // Più token per risposte migliori
+  gen["maxOutputTokens"] = 128; // More tokens for better responses
   gen["temperature"] = 0.3;
   gen["candidateCount"] = 1;
   gen["topP"] = 0.8;
@@ -813,7 +813,7 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
     lastConversationTime = millis();
   }
   
-  // Pulizia memoria se non è pre-connessione
+  // Memory cleanup if not pre-connection
   if (!usePreconnection) {
     delete cli;
   }
@@ -852,7 +852,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(40000); // Timeout più lungo per TTS
+    cli->setTimeout(40000); // Longer timeout for TTS
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -869,12 +869,12 @@ bool googleTTS_say_mulaw_optimized(const String& text){
   d["input"]["text"] = text;
   d["voice"]["languageCode"] = LANG_CODE;
   d["voice"]["name"] = "it-IT-Neural2-C"; // Voce neurale migliore
-  d["voice"]["ssmlGender"] = "MALE"; // Corretto: Neural2-C è voce maschile
+  d["voice"]["ssmlGender"] = "MALE"; // Correct: Neural2-C is male voice
   d["audioConfig"]["audioEncoding"] = "MULAW";
   d["audioConfig"]["sampleRateHertz"] = SR;
-  d["audioConfig"]["speakingRate"] = 1.1; // Leggermente più veloce
+  d["audioConfig"]["speakingRate"] = 1.1; // Slightly faster
   d["audioConfig"]["pitch"] = 0.0;
-  d["audioConfig"]["volumeGainDb"] = 2.0; // Volume più alto
+  d["audioConfig"]["volumeGainDb"] = 2.0; // Higher volume
 
   String req;
   serializeJson(d, req);
@@ -889,7 +889,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
 
   // Lettura risposta ottimizzata
   String resp;
-  resp.reserve(32768); // Buffer più grande per audio
+  resp.reserve(32768); // Larger buffer for audio
   
   while (cli->connected() || cli->available()){
     if (cli->available()) {
@@ -948,7 +948,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
   // Configura I2S per playback
   ESP_ERROR_CHECK(i2s_set_clk(I2S_TX_PORT, SR, I2S_BITS_PER_SAMPLE_16BIT, I2S_CHANNEL_MONO));
 
-  // Decode e playback ottimizzato con buffer più grandi
+  // Optimized decode and playback with larger buffers
   const size_t PCM_BUFFER_SIZE = 1024;
   size_t pcmFill = 0;
   int quartet[4];
@@ -1020,7 +1020,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
             esp_task_wdt_reset();
             taskYIELD();
             
-            // Controlla se il task è stato interrotto
+            // Check if task was interrupted
             TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
             if (currentTask != NULL && eTaskGetState(currentTask) == eDeleted) {
               return false;
@@ -1046,7 +1046,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
 
   Serial.println("✅ TTS playback completato (16kHz ottimizzato)");
   
-  // Pulizia memoria se non è pre-connessione
+  // Memory cleanup if not pre-connection
   if (!usePreconnection) {
     delete cli;
   }
@@ -1137,7 +1137,7 @@ void do_round_parallel(){
     0  // Core 0
   );
   
-  // Task Gemini (aspetterà STT)
+  // Gemini task (will wait for STT)
   xTaskCreatePinnedToCore(
     geminiTask,
     "Gemini_Task",
@@ -1148,7 +1148,7 @@ void do_round_parallel(){
     1  // Core 1
   );
   
-  // Task TTS (aspetterà Gemini)
+  // TTS task (will wait for Gemini)
   xTaskCreatePinnedToCore(
     ttsTask,
     "TTS_Task",
@@ -1256,7 +1256,7 @@ void setup(){
     TOF_OK = false;
   } else {
     Serial.println("✅ VL53L0X inizializzato");
-    lox.setMeasurementTimingBudgetMicroSeconds(20000); // Misure più veloci
+    lox.setMeasurementTimingBudgetMicroSeconds(20000); // Faster measurements
     TOF_OK = true;
   }
 
@@ -1268,9 +1268,9 @@ void setup(){
   initParallelTasks();
   initPreconnections();
 
-  Serial.println("\n✅ Sistema ultra-ottimizzato pronto! Avvicina la mano (<10cm) o premi INVIO");
-  Serial.println("📊 Configurazione: 16kHz, APLL, Buffer PSRAM, CPU 240MHz");
-  Serial.println("💡 Modalità parallela attiva per prestazioni massime!");
+  Serial.println("\n✅ Ultra-optimized system ready! Move hand close (<10cm) or press ENTER");
+  Serial.println("📊 Configuration: 16kHz, APLL, PSRAM Buffers, CPU 240MHz");
+  Serial.println("💡 Parallel mode active for maximum performance!");
 }
 
 unsigned long cooldown_until = 0;
@@ -1292,7 +1292,7 @@ void loop(){
 
     if (millis() >= cooldown_until) {
       if (valid && mm <= TRIGGER_MM) {
-        if (++underCount >= 2) { // Trigger più veloce
+        if (++underCount >= 2) { // Faster trigger
           Serial.println("🚀 Trigger ToF → Avvio conversazione parallela");
           do_round_parallel();
           cooldown_until = millis() + 2000; // Cooldown ridotto

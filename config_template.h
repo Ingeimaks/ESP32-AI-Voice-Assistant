@@ -1,55 +1,55 @@
 /*
- * TEMPLATE DI CONFIGURAZIONE - ESP32 AI Voice Assistant
+ * CONFIGURATION TEMPLATE - ESP32 AI Voice Assistant
  * 
- * ISTRUZIONI:
- * 1. Copia questo file come "config_private.h"
- * 2. Inserisci le tue credenziali reali
- * 3. Il file config_private.h è escluso da Git per sicurezza
+ * INSTRUCTIONS:
+ * 1. Copy this file as "config_private.h"
+ * 2. Insert your real credentials
+ * 3. The config_private.h file is excluded from Git for security
  * 
- * NOTA: Non modificare mai questo template con credenziali reali!
+ * NOTE: Never modify this template with real credentials!
  */
 
 #ifndef CONFIG_TEMPLATE_H
 #define CONFIG_TEMPLATE_H
 
-// === CONFIGURAZIONE WIFI ===
-#define WIFI_SSID     "IL_TUO_WIFI_SSID"        // Nome della tua rete WiFi
-#define WIFI_PASSWORD "LA_TUA_WIFI_PASSWORD"    // Password della tua rete WiFi
+// === WIFI CONFIGURATION ===
+#define WIFI_SSID     "YOUR_WIFI_SSID"        // Your WiFi network name
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"    // Your WiFi network password
 
-// === CONFIGURAZIONE GOOGLE CLOUD ===
-// Ottieni la tua API key da: https://console.cloud.google.com/apis/credentials
-#define GCP_API_KEY   "LA_TUA_API_KEY_GOOGLE_CLOUD"
+// === GOOGLE CLOUD CONFIGURATION ===
+// Get your API key from: https://console.cloud.google.com/apis/credentials
+#define GCP_API_KEY   "YOUR_GOOGLE_CLOUD_API_KEY"
 
-// === CONFIGURAZIONE GEMINI ===
-#define GEMINI_MODEL  "gemini-1.5-flash-latest"  // Modello Gemini da utilizzare
+// === GEMINI CONFIGURATION ===
+#define GEMINI_MODEL  "gemini-1.5-flash-latest"  // Gemini model to use
 
-// === CONFIGURAZIONI AVANZATE (opzionali) ===
+// === ADVANCED CONFIGURATIONS (optional) ===
 
-// Timeout connessioni (millisecondi)
-#define GEMINI_TIMEOUT_MS    30000   // Timeout per Gemini API
-#define TTS_TIMEOUT_MS       40000   // Timeout per Google TTS
-#define STT_TIMEOUT_MS       25000   // Timeout per Google STT
+// Connection timeouts (milliseconds)
+#define GEMINI_TIMEOUT_MS    30000   // Timeout for Gemini API
+#define TTS_TIMEOUT_MS       40000   // Timeout for Google TTS
+#define STT_TIMEOUT_MS       25000   // Timeout for Google STT
 
-// Configurazione audio
-#define RECORDING_TIME_MS    5000    // Durata registrazione audio (ms)
-#define SAMPLE_RATE          16000   // Frequenza campionamento audio
+// Audio configuration
+#define RECORDING_TIME_MS    5000    // Audio recording duration (ms)
+#define SAMPLE_RATE          16000   // Audio sampling frequency
 
-// Configurazione sensore ToF
-#define TRIGGER_DISTANCE     10      // Distanza trigger in cm
-#define COOLDOWN_TIME_MS     2000    // Tempo attesa tra conversazioni
+// ToF sensor configuration
+#define TRIGGER_DISTANCE     10      // Trigger distance in cm
+#define COOLDOWN_TIME_MS     2000    // Wait time between conversations
 
-// Configurazione TTS
-#define TTS_VOICE_NAME       "it-IT-Neural2-C"  // Voce italiana (maschile)
-// Alternative voci:
-// "it-IT-Neural2-A" - Voce femminile
-// "it-IT-Neural2-C" - Voce maschile
+// TTS configuration
+#define TTS_VOICE_NAME       "en-US-Neural2-D"  // English voice (male)
+// Alternative voices:
+// "en-US-Neural2-F" - Female voice
+// "en-US-Neural2-D" - Male voice
 
-#define TTS_SPEAKING_RATE    1.1     // Velocità parlato (0.25 - 4.0)
-#define TTS_VOLUME_GAIN      2.0     // Guadagno volume (-96.0 - 16.0 dB)
+#define TTS_SPEAKING_RATE    1.1     // Speaking speed (0.25 - 4.0)
+#define TTS_VOLUME_GAIN      2.0     // Volume gain (-96.0 - 16.0 dB)
 
-// Configurazione Gemini
-#define GEMINI_MAX_TOKENS    128     // Massimo numero di token output
-#define GEMINI_TEMPERATURE   0.7     // Creatività risposte (0.0 - 1.0)
+// Gemini configuration
+#define GEMINI_MAX_TOKENS    128     // Maximum number of output tokens
+#define GEMINI_TEMPERATURE   0.7     // Response creativity (0.0 - 1.0)
 
 // Debug level (0=None, 1=Error, 2=Warn, 3=Info, 4=Debug)
 #define DEBUG_LEVEL          3
@@ -57,20 +57,20 @@
 #endif // CONFIG_TEMPLATE_H
 
 /*
- * ESEMPIO DI UTILIZZO:
+ * USAGE EXAMPLE:
  * 
- * 1. Crea account Google Cloud: https://console.cloud.google.com/
- * 2. Abilita le API:
+ * 1. Create Google Cloud account: https://console.cloud.google.com/
+ * 2. Enable APIs:
  *    - Speech-to-Text API
  *    - Text-to-Speech API  
- *    - Vertex AI API (per Gemini)
- * 3. Crea API Key in "APIs & Services" > "Credentials"
- * 4. Copia questo file come "config_private.h"
- * 5. Sostituisci i placeholder con i tuoi dati reali
- * 6. Compila e carica il firmware
+ *    - Vertex AI API (for Gemini)
+ * 3. Create API Key in "APIs & Services" > "Credentials"
+ * 4. Copy this file as "config_private.h"
+ * 5. Replace placeholders with your real data
+ * 6. Compile and upload firmware
  * 
- * SICUREZZA:
- * - Non condividere mai il file config_private.h
- * - Non committare credenziali nel repository
- * - Usa sempre questo template per la distribuzione pubblica
+ * SECURITY:
+ * - Never share the config_private.h file
+ * - Never commit credentials to the repository
+ * - Always use this template for public distribution
  */

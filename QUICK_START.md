@@ -1,219 +1,224 @@
-# 🚀 Guida Rapida - ESP32 AI Voice Assistant
+# 🚀 Quick Start Guide - ESP32 AI Voice Assistant
 
-## ⚡ Setup in 5 Minuti
+## ⚡ Setup in 5 Minutes
 
-### 1. 📋 Prerequisiti
-- **Hardware**: ESP32-S3 + Microfono I2S + Speaker I2S
-- **Software**: Arduino IDE con supporto ESP32
-- **Account**: Google Cloud Platform (gratuito)
+### 1. 📋 Prerequisites
+- **Hardware**: ESP32-S3 + I2S Microphone + I2S Speaker
+- **Software**: Arduino IDE with ESP32 support
+- **Account**: Google Cloud Platform (free tier available)
 
-### 2. 🔧 Installazione Arduino IDE
+### 2. 🔧 Arduino IDE Installation
 
-1. **Scarica Arduino IDE**: https://www.arduino.cc/en/software
-2. **Aggiungi ESP32**:
+1. **Download Arduino IDE**: https://www.arduino.cc/en/software
+2. **Add ESP32 Support**:
    - File → Preferences
    - Additional Board Manager URLs:
      ```
      https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
      ```
-3. **Installa Board ESP32**:
+3. **Install ESP32 Board**:
    - Tools → Board → Boards Manager
-   - Cerca "ESP32" → Installa
+   - Search "ESP32" → Install
 
-### 3. 📚 Librerie Richieste
+### 3. 📚 Required Libraries
 
-Installa tramite Library Manager (Tools → Manage Libraries):
+Install via Library Manager (Tools → Manage Libraries):
 ```
 - ArduinoJson (>= 6.21.0)
 - Adafruit VL53L0X
 ```
 
-### 4. ☁️ Configurazione Google Cloud
+### 4. ☁️ Google Cloud Configuration
 
-#### A. Crea Progetto
-1. Vai su: https://console.cloud.google.com/
-2. **New Project** → Inserisci nome → Create
+#### A. Create Project
+1. Go to: https://console.cloud.google.com/
+2. **New Project** → Enter name → Create
 
-#### B. Abilita API
+#### B. Enable APIs
 1. **APIs & Services** → **Library**
-2. Cerca e abilita:
+2. Search and enable:
    - ✅ **Speech-to-Text API**
    - ✅ **Text-to-Speech API**
-   - ✅ **Vertex AI API** (per Gemini)
+   - ✅ **Vertex AI API** (for Gemini)
 
-#### C. Genera API Key
+#### C. Generate API Key
 1. **APIs & Services** → **Credentials**
 2. **Create Credentials** → **API Key**
-3. **Copia la chiave** (inizia con `AIza...`)
+3. **Copy the key** (starts with `AIza...`)
 
-### 5. ⚙️ Configurazione Progetto
+### 5. ⚙️ Project Configuration
 
-#### A. Scarica Codice
+#### A. Download Project
 ```bash
-git clone [URL_REPOSITORY]
+git clone https://github.com/Ingeimaks/ESP32-AI-Voice-Assistant.git
 cd ESP32-AI-Voice-Assistant
 ```
 
-#### B. Configura Credenziali
-1. **Copia template**:
-   ```
-   cp config_template.h config_private.h
-   ```
+#### B. Configure Credentials
+1. **Copy template**: `config_template.h` → `config_private.h`
+2. **Edit** `config_private.h`:
 
-2. **Modifica `config_private.h`**:
-   ```cpp
-   #define WIFI_SSID     "TuoWiFi"           // 📶 Nome WiFi
-   #define WIFI_PASSWORD "TuaPassword"       // 🔐 Password WiFi  
-   #define GCP_API_KEY   "AIza..."           // 🔑 Tua API Key Google
-   ```
+```cpp
+// WiFi Configuration
+#define WIFI_SSID     "YourWiFi"           // 📶 WiFi Name
+#define WIFI_PASSWORD "YourPassword"       // 🔐 WiFi Password
 
-### 6. 🔌 Connessioni Hardware
-
-#### Microfono INMP441 → ESP32-S3
-```
-VCC  → 3.3V
-GND  → GND
-SCK  → GPIO 4   (Clock)
-WS   → GPIO 5   (Word Select)
-SD   → GPIO 6   (Data)
+// Google Cloud Configuration
+#define GCP_API_KEY   "AIza..."            // 🔑 Your API Key
+#define GEMINI_MODEL  "gemini-1.5-flash"   // 🤖 AI Model
 ```
 
-#### Speaker MAX98357A → ESP32-S3
-```
-VIN  → 5V
-GND  → GND
-BCLK → GPIO 16  (Bit Clock)
-LRC  → GPIO 17  (Left/Right Clock)
-DIN  → GPIO 18  (Data Input)
-```
+### 6. 🔌 Hardware Wiring
 
-#### Sensore VL53L0X → ESP32-S3 (Opzionale)
+#### INMP441 Microphone (I2S_NUM_1)
 ```
-VIN  → 3.3V
-GND  → GND
-SDA  → GPIO 20
-SCL  → GPIO 21
+ESP32-S3    INMP441
+--------    -------
+GPIO 42  -> SCK
+GPIO 2   -> WS
+GPIO 41  -> SD
+3.3V     -> VDD
+GND      -> GND
 ```
 
-### 7. 📤 Caricamento Firmware
-
-1. **Apri Arduino IDE**
-2. **Apri file**: `assistente_ai_optimized/assistente_ai_optimized.ino`
-3. **Seleziona Board**:
-   - Tools → Board → ESP32 Arduino → **ESP32S3 Dev Module**
-4. **Configura Board**:
-   - CPU Frequency: **240MHz**
-   - Flash Size: **16MB**
-   - PSRAM: **OPI PSRAM**
-   - Partition Scheme: **16M Flash (3MB APP/9.9MB FATFS)**
-5. **Seleziona Porta**: Tools → Port → [Tua porta COM]
-6. **Carica**: Ctrl+U o pulsante Upload ➡️
-
-### 8. 🧪 Test Funzionamento
-
-1. **Apri Serial Monitor**: Tools → Serial Monitor (115200 baud)
-2. **Attendi connessione WiFi**:
-   ```
-   ✅ WiFi connesso: 192.168.1.100
-   ✅ Pre-connessioni TLS stabilite
-   🎯 Sistema pronto!
-   ```
-3. **Testa conversazione**:
-   - **Automatico**: Avvicina mano al sensore (< 10cm)
-   - **Manuale**: Premi INVIO nel Serial Monitor
-4. **Parla quando vedi**: `🎙️ Registrazione...`
-5. **Attendi risposta vocale**
-
-## 🎯 Comandi di Test
-
-### Esempi Vocali
-- "Ciao, come stai?"
-- "Che ore sono?"
-- "Raccontami una barzelletta"
-- "Spiegami l'intelligenza artificiale"
-
-### Comandi Serial Monitor
-- `INVIO` → Avvia conversazione
-- `test` + INVIO → Test rapido sistema
-
-## 🔧 Risoluzione Problemi
-
-### ❌ "WiFi connection failed"
-**Soluzione**: Verifica SSID e password in `config_private.h`
-
-### ❌ "HTTPS connect failed"
-**Soluzione**: 
-- Verifica API Key Google Cloud
-- Controlla che le API siano abilitate
-- Verifica connessione internet
-
-### ❌ "STT failed"
-**Soluzione**:
-- Controlla connessioni microfono
-- Parla più chiaramente
-- Verifica alimentazione
-
-### ❌ "No audio output"
-**Soluzione**:
-- Controlla connessioni speaker
-- Verifica alimentazione (usa alimentatore esterno 5V 2A)
-- Controlla volume
-
-### 🔄 Reset Completo
-1. Disconnetti alimentazione
-2. Tieni premuto BOOT
-3. Riconnetti alimentazione
-4. Rilascia BOOT
-5. Ricarica firmware
-
-## 📊 Monitoraggio Prestazioni
-
-Il sistema mostra metriche in tempo reale:
+#### MAX98357A Amplifier (I2S_NUM_0)
 ```
-📊 Tempi: STT=15s, Gemini=12s, TTS=4s
-⚡ Round parallelo: 20s (63% più veloce!)
-💾 Heap: 183KB liberi
-💾 PSRAM: 8MB liberi
+ESP32-S3    MAX98357A
+--------    ---------
+GPIO 12  -> BCLK
+GPIO 13  -> LRC
+GPIO 14  -> DIN
+5V       -> VIN
+GND      -> GND
+```
+
+#### VL53L0X ToF Sensor (Optional)
+```
+ESP32-S3    VL53L0X
+--------    -------
+GPIO 21  -> SDA
+GPIO 22  -> SCL
+3.3V     -> VIN
+GND      -> GND
+```
+
+### 7. 📤 Upload Code
+
+1. **Open**: `assistente_ai_optimized/assistente_ai_optimized.ino`
+2. **Select Board**: Tools → Board → ESP32S3 Dev Module
+3. **Configure**:
+   - **CPU Frequency**: 240MHz
+   - **Flash Size**: 16MB
+   - **PSRAM**: OPI PSRAM
+   - **Partition**: Default 4MB with spiffs
+4. **Upload** 🚀
+
+### 8. 🎯 First Test
+
+1. **Open Serial Monitor** (115200 baud)
+2. **Wait for WiFi connection** ✅
+3. **Trigger conversation**:
+   - Move hand near ToF sensor (< 10cm)
+   - OR press ENTER in Serial Monitor
+4. **Speak for 5 seconds** when you see "🎙️ Recording..."
+5. **Listen to AI response** 🔊
+
+## 🎛️ Usage Modes
+
+### Automatic Trigger
+- **ToF Sensor**: Move hand within 10cm
+- **Cooldown**: 2 seconds between conversations
+
+### Manual Trigger
+- **Serial Monitor**: Press ENTER
+- **Test Command**: Type "test" + ENTER
+
+### Voice Command Examples
+- "Hello, how are you?"
+- "What's the weather like today?"
+- "Tell me a joke"
+- "Explain quantum physics"
+
+## 🔧 Customization
+
+### Change TTS Voice
+```cpp
+d["voice"]["name"] = "en-US-Neural2-F";  // Female voice
+d["voice"]["name"] = "en-US-Neural2-D";  // Male voice (default)
+```
+
+### Adjust Speaking Speed
+```cpp
+d["audioConfig"]["speakingRate"] = 1.3;  // Faster
+d["audioConfig"]["speakingRate"] = 0.8;  // Slower
+```
+
+### Modify ToF Sensitivity
+```cpp
+const int TRIGGER_DISTANCE = 15;  // Distance in cm
+```
+
+## 📊 Performance Monitoring
+
+The system provides detailed metrics:
+
+```
+📊 Times: STT=15234ms, Gemini=12456ms, TTS=4123ms
+⚡ Parallel round completed: 20567ms
+💾 Free heap: 183524 bytes
+💾 Free PSRAM: 8322780 bytes
 🌐 WiFi: -45dBm
 ```
 
-## 🎛️ Personalizzazioni Rapide
+## 🛠️ Troubleshooting
 
-### Cambia Voce
+### Common Issues
+
+#### "❌ HTTPS connect failed"
+- ✅ Check WiFi connection
+- ✅ Verify Google Cloud API key
+- ✅ Ensure APIs are enabled
+
+#### "❌ STT failed"
+- ✅ Check microphone connections
+- ✅ Verify microphone is working
+- ✅ Speak clearly and close to microphone
+
+#### "❌ TTS failed"
+- ✅ Check speaker connections
+- ✅ Verify power supply (may need external 5V 2A)
+- ✅ Check system volume
+
+#### Continuous Reboots
+- ✅ Use external 5V 2A power supply
+- ✅ Verify I2S connections
+- ✅ Check PSRAM memory
+
+### Advanced Debug
+
+Enable detailed debugging:
 ```cpp
-// In config_private.h
-#define TTS_VOICE_NAME "it-IT-Neural2-A"  // Femminile
-#define TTS_VOICE_NAME "it-IT-Neural2-C"  // Maschile
+#define DEBUG_LEVEL 3  // 0=None, 1=Error, 2=Warn, 3=Info, 4=Debug
 ```
 
-### Regola Velocità
-```cpp
-#define TTS_SPEAKING_RATE 1.3  // Più veloce
-#define TTS_SPEAKING_RATE 0.8  // Più lento
-```
+## 🎯 Next Steps
 
-### Modifica Sensibilità Sensore
-```cpp
-#define TRIGGER_DISTANCE 15  // Distanza in cm
-```
+1. **📖 Read full documentation**: [README.md](README.md)
+2. **🔧 Customize settings** for your needs
+3. **🎥 Watch tutorial videos** on Ingeimaks YouTube
+4. **🤝 Join community** on Telegram: https://t.me/Ingeimaks
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: Open GitHub issue
+- 💡 **Feature Requests**: GitHub Discussions
+- 🎥 **Tutorials**: Ingeimaks YouTube Channel
+- 📧 **Contact**: Via YouTube or GitHub
 
 ---
 
-## 👨‍💻 Autore
+**🎉 Congratulations! Your ESP32 AI Voice Assistant is ready!**
 
-**Ingeimaks** - Creatore del progetto
+**⭐ If this helped you, please star the project on GitHub!**
 
-✍️ **Segui il canale Ingeimaks per nuovi progetti ESP32 e altri contenuti di elettronica, Arduino e stampa 3D!**
-
-🎥 **YouTube**: https://www.youtube.com/@Ingeimaks
-
-## 🆘 Supporto
-
-- 🐛 **Bug**: Apri issue su GitHub
-- 💬 **Domande**: Discussioni GitHub
-- 🎥 **Tutorial**: Canale YouTube Ingeimaks
-- 📖 **Documentazione completa**: `README.md`
-
-**🎉 Buon divertimento con il tuo assistente AI!**
-
-**🎥 Non dimenticare di iscriverti al canale Ingeimaks!**
+**🎥 Subscribe to Ingeimaks for more amazing ESP32 projects!**
