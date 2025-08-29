@@ -1,3 +1,14 @@
+/*
+ * ESP32 AI Voice Assistant - Versione Ottimizzata
+ * 
+ * ISTRUZIONI CONFIGURAZIONE:
+ * 1. Copia il file "config_template.h" come "config_private.h"
+ * 2. Modifica "config_private.h" con le tue credenziali WiFi e Google Cloud
+ * 3. Compila e carica il firmware
+ * 
+ * NOTA: Il file config_private.h è escluso da Git per sicurezza
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -12,12 +23,22 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+// Includi configurazione privata (crea questo file da config_template.h)
+#ifdef __has_include
+  #if __has_include("../config_private.h")
+    #include "../config_private.h"
+    #define CONFIG_LOADED
+  #endif
+#endif
+
+#ifndef CONFIG_LOADED
+  #error "ERRORE: File config_private.h non trovato! Copia config_template.h come config_private.h e inserisci le tue credenziali."
+#endif
+
 // ==== CONFIG WiFi & Google ====
-const char* WIFI_SSID = "Vodafone-Secondario";
-const char* WIFI_PASS = "jkzdfc356wvsb4i";
-#define GCP_API_KEY   "AIzaSyBE8LN5t84X0Mpez3-QVNaQbuMzgJgjQZk"
+const char* WIFI_SSID = WIFI_SSID;
+const char* WIFI_PASS = WIFI_PASSWORD;
 #define LANG_CODE      "it-IT"
-#define GEMINI_MODEL   "gemini-1.5-flash-8b"
 
 const char* STT_HOST  = "speech.googleapis.com";
 const char* GEM_HOST  = "generativelanguage.googleapis.com";
@@ -109,6 +130,11 @@ SemaphoreHandle_t sttSemaphore;
 SemaphoreHandle_t geminiSemaphore;
 SemaphoreHandle_t ttsSemaphore;
 
+// Sistema anti-ripetizione
+String lastUserInput = "";
+String lastGeminiReply = "";
+uint32_t lastConversationTime = 0;
+
 // ==== MEMORY MANAGEMENT ====
 void* psram_malloc(size_t size) {
   void* ptr = heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
@@ -189,8 +215,26 @@ void sttTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  sttResult.success = stt_stream_optimized(sttResult.transcript);
+  // Retry automatico per STT
+  int retryCount = 0;
+  const int maxRetries = 2;
+  
+  do {
+    if (retryCount > 0) {
+      Serial.printf("🔄 STT retry %d/%d\n", retryCount, maxRetries);
+      delay(1000); // Pausa tra retry
+    }
+    
+    sttResult.success = stt_stream_optimized(sttResult.transcript);
+    retryCount++;
+    
+  } while (!sttResult.success && retryCount <= maxRetries);
+  
   sttResult.processingTime = millis() - startTime;
+  
+  if (!sttResult.success) {
+    Serial.printf("❌ STT fallita dopo %d tentativi\n", maxRetries);
+  }
   
   xSemaphoreGive(sttSemaphore);
   vTaskDelete(NULL);
@@ -200,14 +244,33 @@ void geminiTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  // Aspetta che STT sia completato
-  if (xSemaphoreTake(sttSemaphore, pdMS_TO_TICKS(30000)) == pdTRUE) {
+  // Aspetta che STT sia completato con timeout più lungo
+  if (xSemaphoreTake(sttSemaphore, pdMS_TO_TICKS(45000)) == pdTRUE) {
     if (sttResult.success) {
-      geminiResult.success = gemini_generate_reply_optimized(sttResult.transcript, geminiResult.reply);
+      // Retry automatico per Gemini
+      int retryCount = 0;
+      const int maxRetries = 2;
+      
+      do {
+        if (retryCount > 0) {
+          Serial.printf("🔄 Gemini retry %d/%d\n", retryCount, maxRetries);
+          delay(2000); // Pausa più lunga per Gemini
+        }
+        
+        geminiResult.success = gemini_generate_reply_optimized(sttResult.transcript, geminiResult.reply);
+        retryCount++;
+        
+      } while (!geminiResult.success && retryCount <= maxRetries);
+      
+      if (!geminiResult.success) {
+        Serial.printf("❌ Gemini fallita dopo %d tentativi\n", maxRetries);
+      }
     } else {
+      Serial.println("⚠️ STT fallita, Gemini non eseguito");
       geminiResult.success = false;
     }
   } else {
+    Serial.println("❌ Timeout STT (45s), Gemini non eseguito");
     geminiResult.success = false;
   }
   
@@ -220,14 +283,33 @@ void ttsTask(void* parameter) {
   String* inputText = (String*)parameter;
   uint32_t startTime = millis();
   
-  // Aspetta che Gemini sia completato
-  if (xSemaphoreTake(geminiSemaphore, pdMS_TO_TICKS(35000)) == pdTRUE) {
+  // Aspetta che Gemini sia completato con timeout più lungo
+  if (xSemaphoreTake(geminiSemaphore, pdMS_TO_TICKS(50000)) == pdTRUE) {
     if (geminiResult.success) {
-      ttsResult.success = googleTTS_say_mulaw_optimized(geminiResult.reply);
+      // Retry automatico per TTS
+      int retryCount = 0;
+      const int maxRetries = 2;
+      
+      do {
+        if (retryCount > 0) {
+          Serial.printf("🔄 TTS retry %d/%d\n", retryCount, maxRetries);
+          delay(1500); // Pausa media per TTS
+        }
+        
+        ttsResult.success = googleTTS_say_mulaw_optimized(geminiResult.reply);
+        retryCount++;
+        
+      } while (!ttsResult.success && retryCount <= maxRetries);
+      
+      if (!ttsResult.success) {
+        Serial.printf("❌ TTS fallita dopo %d tentativi\n", maxRetries);
+      }
     } else {
+      Serial.println("⚠️ Gemini fallita, TTS non eseguito");
       ttsResult.success = false;
     }
   } else {
+    Serial.println("❌ Timeout Gemini (50s), TTS non eseguito");
     ttsResult.success = false;
   }
   
@@ -479,7 +561,7 @@ bool stt_stream_optimized(String& outText){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(25000);
+    cli->setTimeout(35000); // Timeout più lungo per STT
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -528,26 +610,31 @@ bool stt_stream_optimized(String& outText){
     if (samplesSent + n > samplesTarget) n = samplesTarget - samplesSent;
 
     // Conversione ottimizzata
-    for (size_t i = 0; i < n; ++i){
-      int16_t s16 = i2s32to16(g_i2sBuf[i]);
-      int16_t a = (s16 < 0) ? -s16 : s16;
-      if (a > peak) peak = a;
-      sumSq += (int32_t)s16 * (int32_t)s16;
-      g_ulawBuf[i] = pcm16_to_mulaw(s16);
-    }
+      for (size_t i = 0; i < n; ++i){
+        int16_t s16 = i2s32to16(g_i2sBuf[i]);
+        int16_t a = (s16 < 0) ? -s16 : s16;
+        if (a > peak) peak = a;
+        sumSq += (int32_t)s16 * (int32_t)s16;
+        g_ulawBuf[i] = pcm16_to_mulaw(s16);
+      }
 
-    if (!b64_stream_write(*cli, g_ulawBuf, n)) {
-      Serial.println("❌ base64 encode");
-      if (!usePreconnection) delete cli;
-      return false;
-    }
-    samplesSent += n;
-    
-    // Yield per evitare watchdog
-    if (samplesSent % 8000 == 0) {
-      yield();
-      esp_task_wdt_reset();
-    }
+      if (!b64_stream_write(*cli, g_ulawBuf, n)) {
+        Serial.println("❌ base64 encode");
+        if (!usePreconnection) delete cli;
+        return false;
+      }
+      samplesSent += n;
+      
+      // Yield e watchdog reset più frequenti per evitare timeout
+      if (samplesSent % 4000 == 0) {
+        taskYIELD();
+        esp_task_wdt_reset();
+        
+        // Controllo memoria durante registrazione
+        if (ESP.getFreeHeap() < 30000) {
+          Serial.println("⚠️ Memoria bassa durante registrazione");
+        }
+      }
   }
   
   if (!b64_stream_flush(*cli)) {
@@ -625,7 +712,7 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(20000);
+    cli->setTimeout(30000); // Timeout più lungo per Gemini
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -639,13 +726,38 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
     Serial.printf("⏱️ TLS Gemini fallback: %ums\n", gTLS - g0);
   }
 
+  // Sistema anti-ripetizione
+  uint32_t currentTime = millis();
+  bool isRepetitive = false;
+  
+  // Controlla se è una domanda ripetitiva
+  if (userText == lastUserInput && (currentTime - lastConversationTime) < 300000) { // 5 minuti
+    Serial.println("⚠️ Domanda ripetitiva rilevata, aggiungo contesto");
+    isRepetitive = true;
+  }
+  
   // JSON ottimizzato
   DynamicJsonDocument d(2048);
   JsonArray contents = d.createNestedArray("contents");
+  
+  // Aggiungi contesto se necessario
+  if (isRepetitive && lastGeminiReply.length() > 0) {
+    JsonObject assistant = contents.createNestedObject();
+    assistant["role"] = "model";
+    JsonArray assistantParts = assistant.createNestedArray("parts");
+    assistantParts.createNestedObject()["text"] = lastGeminiReply;
+  }
+  
   JsonObject u = contents.createNestedObject();
   u["role"] = "user";
   JsonArray parts = u.createNestedArray("parts");
-  parts.createNestedObject()["text"] = userText;
+  
+  String enhancedText = userText;
+  if (isRepetitive) {
+    enhancedText = "Hai già risposto a questa domanda. Puoi fornire una risposta diversa o più dettagliata? " + userText;
+  }
+  
+  parts.createNestedObject()["text"] = enhancedText;
   
   JsonObject gen = d.createNestedObject("generationConfig");
   gen["maxOutputTokens"] = 128; // Più token per risposte migliori
@@ -694,6 +806,13 @@ bool gemini_generate_reply_optimized(const String& userText, String& outReply){
   outReply = out["candidates"][0]["content"]["parts"][0]["text"] | "";
   bool success = outReply.length() > 0;
   
+  // Aggiorna cronologia conversazione
+  if (success) {
+    lastUserInput = userText;
+    lastGeminiReply = outReply;
+    lastConversationTime = millis();
+  }
+  
   // Pulizia memoria se non è pre-connessione
   if (!usePreconnection) {
     delete cli;
@@ -733,7 +852,7 @@ bool googleTTS_say_mulaw_optimized(const String& text){
   } else {
     // Fallback: crea nuova connessione
     cli = new WiFiClientSecure();
-    cli->setTimeout(30000);
+    cli->setTimeout(40000); // Timeout più lungo per TTS
     cli->setInsecure();
     cli->setNoDelay(true);
     
@@ -839,10 +958,13 @@ bool googleTTS_say_mulaw_optimized(const String& text){
   for (int i = q0; i < body.length() && !done; ++i){
     char c = body[i];
     
-    // Reset watchdog ogni 100 caratteri per evitare timeout
-    if (i % 100 == 0) {
+    // Reset watchdog basato su tempo per evitare riavvii con risposte lunghe
+    static uint32_t lastTimeCheck = 0;
+    uint32_t currentTime = millis();
+    if (currentTime - lastTimeCheck >= 200) { // Ogni 200ms
       esp_task_wdt_reset();
-      yield();
+      taskYIELD();
+      lastTimeCheck = currentTime;
     }
     
     if (c == '"') {
@@ -864,12 +986,23 @@ bool googleTTS_say_mulaw_optimized(const String& text){
         if (v3 == -2) outN = 2;
         if (v2 == -2) outN = 1;
 
+        // Controllo watchdog basato su tempo per evitare riavvii
+        static uint32_t lastWatchdogReset = 0;
+        uint32_t currentTime = millis();
+        
         for (int j = 0; j < outN; ++j){
           g_pcmBuf[pcmFill++] = mulaw_to_pcm16(out[j]);
           
-          // Reset watchdog durante processing audio intensivo
-          if (pcmFill % 256 == 0) {
+          // Reset watchdog basato su tempo invece che su campioni
+          if (currentTime - lastWatchdogReset >= 500) { // Ogni 500ms
             esp_task_wdt_reset();
+            taskYIELD();
+            lastWatchdogReset = currentTime;
+            
+            // Controllo memoria durante riproduzione
+            if (ESP.getFreeHeap() < 25000) {
+              Serial.println("⚠️ Memoria critica durante TTS");
+            }
           }
           
           if (pcmFill == PCM_BUFFER_SIZE){
@@ -883,10 +1016,9 @@ bool googleTTS_say_mulaw_optimized(const String& text){
             }
             pcmFill = 0;
             
-            // Gestione ottimizzata per evitare interruzioni
-            if (pcmFill % 4 == 0) {
-              yield(); // Yield meno frequente
-            }
+            // Reset watchdog dopo ogni buffer scritto
+            esp_task_wdt_reset();
+            taskYIELD();
             
             // Controlla se il task è stato interrotto
             TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
@@ -967,6 +1099,25 @@ void do_round_parallel(){
   // Verifica e ripristina pre-connessioni se necessario
   checkAndRestorePreconnections();
   
+  // Controllo memoria prima di iniziare
+  uint32_t freeHeap = ESP.getFreeHeap();
+  uint32_t freePsram = ESP.getFreePsram();
+  
+  Serial.printf("💾 Memoria disponibile: Heap=%u, PSRAM=%u\n", freeHeap, freePsram);
+  
+  if (freeHeap < 50000) {
+    Serial.println("⚠️ Memoria heap bassa, forzando garbage collection");
+    // Forza pulizia memoria
+    String dummy;
+    dummy.reserve(1000);
+    dummy = "";
+  }
+  
+  if (freePsram < 1000000) {
+    Serial.println("❌ PSRAM insufficiente per operazione");
+    return;
+  }
+  
   // Reset risultati
   sttResult.success = false;
   geminiResult.success = false;
@@ -1008,8 +1159,8 @@ void do_round_parallel(){
     0  // Core 0
   );
   
-  // Aspetta completamento di tutti i task
-  if (xSemaphoreTake(ttsSemaphore, pdMS_TO_TICKS(60000)) == pdTRUE) {
+  // Aspetta completamento di tutti i task con timeout esteso
+  if (xSemaphoreTake(ttsSemaphore, pdMS_TO_TICKS(90000)) == pdTRUE) {
     uint32_t roundEnd = millis();
     
     // Mostra risultati
@@ -1036,7 +1187,27 @@ void do_round_parallel(){
                   sttResult.processingTime, geminiResult.processingTime, ttsResult.processingTime);
     
   } else {
-    Serial.println("❌ Timeout round parallelo");
+    Serial.println("❌ Timeout round parallelo (90s)");
+    
+    // Cleanup forzato dei task se ancora in esecuzione
+    if (sttTaskHandle) {
+      vTaskDelete(sttTaskHandle);
+      sttTaskHandle = nullptr;
+    }
+    if (geminiTaskHandle) {
+      vTaskDelete(geminiTaskHandle);
+      geminiTaskHandle = nullptr;
+    }
+    if (ttsTaskHandle) {
+      vTaskDelete(ttsTaskHandle);
+      ttsTaskHandle = nullptr;
+    }
+    
+    // Reset pre-connessioni dopo timeout
+    Serial.println("🔄 Reset pre-connessioni dopo timeout");
+    cleanupPreconnections();
+    delay(2000);
+    initPreconnections();
   }
   
   // Pulizia task handle per evitare riferimenti non validi
@@ -1055,6 +1226,15 @@ void setup(){
   
   // Configurazione CPU per prestazioni massime
   setCpuFrequencyMhz(240); // Frequenza massima
+  
+  // Configurazione watchdog senza monitoraggio core IDLE per evitare crash
+  esp_task_wdt_config_t wdt_config = {
+    .timeout_ms = 30000,  // 30 secondi timeout
+    .idle_core_mask = 0,  // NON monitorare i core IDLE
+    .trigger_panic = false // Non causare panic, solo reset
+  };
+  esp_task_wdt_init(&wdt_config);
+  // Non aggiungere task al watchdog per evitare interferenze con audio
   
   Serial.println("🚀 ESP32-S3 Assistente AI Ottimizzato");
   Serial.printf("💾 PSRAM: %u bytes\n", ESP.getPsramSize());

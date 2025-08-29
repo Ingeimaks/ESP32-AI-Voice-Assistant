@@ -1,0 +1,103 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Arduino IDE
+*.ino.bin
+*.ino.elf
+*.ino.hex
+*.ino.map
+*.ino.partitions.bin
+*.ino.bootloader.bin
+
+# PlatformIO
+.pio/
+.vscode/
+*.ini.bak
+
+# Build directories
+build/
+dist/
+*.tmp
+*.temp
+
+# IDE files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# API Keys and sensitive data
+config_private.h
+**/config_private.h
+secrets.h
+api_keys.txt
+*.key
+*.pem
+*.crt
+
+# Configurazioni private
+config_private.*
+credentials.*
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.lnk
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# Test files
+test_output/
+*.test
+
+# Hardware design files (optional)
+# *.brd
+# *.sch
+# *.pcb
